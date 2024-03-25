@@ -36,7 +36,10 @@ func main() {
 	var res string
 	if path == "/" {
 		res = "HTTP/1.1 200 OK\r\n\r\n"
+	} else {
+		res = "HTTP/1.1 404 Not Found\r\n\r\n"
 	}
+	fmt.Println(res)
 	conn.Write([]byte(res))
 	if err != nil {
 		fmt.Println("Error accepting connection: ", err)
