@@ -36,6 +36,9 @@ func main() {
 	var res string
 	if path == "/" {
 		res = "HTTP/1.1 200 OK\r\n\r\n"
+	} else if strings.HasPrefix(path, "/echo/") {
+		msg := path[6:]
+		res = fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %v\r\n\r\n%v", msg, len(msg))
 	} else {
 		res = "HTTP/1.1 404 Not Found\r\n\r\n"
 	}
