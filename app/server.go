@@ -4,26 +4,42 @@ import (
 	"fmt"
 	"net"
 	"os"
-	// Uncomment this block to pass the first stage
-	// "net"
-	// "os"
+	"strings"
 )
+
+const CRLF = "\r\n"
 
 func main() {
 	// You can use print statements as follows for debugging, they'll be visible when running tests.
 	fmt.Println("Logs from your program will appear here!")
 
-	// Uncomment this block to pass the first stage
-	//
 	ln, err := net.Listen("tcp", "0.0.0.0:4221")
 	if err != nil {
 		fmt.Println("Failed to bind to port 4221")
 		os.Exit(1)
 	}
-
-	_, err = ln.Accept()
+	defer ln.Close()
+	conn, err := ln.Accept()
 	if err != nil {
-		fmt.Println("Error accepting connection: ", err.Error())
+		fmt.Println("Error accepting connection: ", err)
+		os.Exit(1)
+	}
+	buf := make([]byte, 1024)
+	_, err = conn.Read(buf)
+	if err != nil {
+		fmt.Println("Error accepting connection: ", err)
+	}
+	req := string(buf)
+	lines := strings.Split(req, CRLF)
+	path := strings.Split(lines[0], " ")[1]
+	fmt.Println(path)
+	var res string
+	if path == "/" {
+		res = "HTTP/1.1 200 OK\r\n\r\n"
+	}
+	conn.Write([]byte(res))
+	if err != nil {
+		fmt.Println("Error accepting connection: ", err)
 		os.Exit(1)
 	}
 }
