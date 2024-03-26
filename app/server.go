@@ -36,6 +36,7 @@ func main() {
 			req := string(buf)
 			lines := strings.Split(req, CRLF)
 			path := strings.Split(lines[0], " ")[1]
+			method := strings.Split(lines[0], " ")[0]
 			fmt.Println(path)
 			var res string
 			if path == "/" {
@@ -47,15 +48,30 @@ func main() {
 				msg := strings.Split(lines[2], " ")[1]
 				res = fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %v\r\n\r\n%v", len(msg), msg)
 			} else if strings.HasPrefix(path, "/files/") && *dir != "" {
-				file := path[7:]
-				fmt.Println(*dir + file)
-				if content, err := os.ReadFile(*dir + file); err == nil {
-					content := string(content)
-					res = fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: %d\r\n\r\n%s", len(content), content)
-				} else {
-					res = "HTTP/1.1 404 Not Found\r\n\r\n"
-				}
+				filename := path[7:]
+				fmt.Println(*dir + filename)
+				if method == "GET" {
+					if file, err := os.ReadFile(*dir + filename); err == nil {
+						content := string(file)
+						res = fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: %d\r\n\r\n%s", len(content), content)
+					} else {
+						res = "HTTP/1.1 404 Not found\r\n\r\n"
+					}
+				} else if method == "POST" {
+					file := []byte(strings.Trim(lines[6], "\x00"))
 
+					if err := os.WriteFile(*dir+filename, file, 0644); err == nil {
+
+						fmt.Println("wrote file")
+
+						res = "HTTP/1.1 201 OK\r\n\r\n"
+
+					} else {
+
+						res = "HTTP/1.1 404 Not found\r\n\r\n"
+
+					}
+				}
 			} else {
 				res = "HTTP/1.1 404 Not Found\r\n\r\n"
 			}
