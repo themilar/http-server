@@ -28,6 +28,7 @@ func main() {
 			os.Exit(1)
 		}
 		go func() {
+			defer conn.Close()
 			buf := make([]byte, 1024)
 			_, err = conn.Read(buf)
 			if err != nil {
