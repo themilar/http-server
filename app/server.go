@@ -60,17 +60,11 @@ func main() {
 					}
 				} else if method == "POST" {
 					file := []byte(strings.Trim(lines[6], "\x00"))
-
 					if err := os.WriteFile(*dir+filename, file, 0644); err == nil {
-
 						fmt.Println("wrote file")
-
 						res = "HTTP/1.1 201 OK\r\n\r\n"
-
 					} else {
-
 						res = "HTTP/1.1 404 Not found\r\n\r\n"
-
 					}
 				}
 			} else {
