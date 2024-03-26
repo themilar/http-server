@@ -53,7 +53,7 @@ func main() {
 					content := string(content)
 					res = fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: %d\r\n\r\n%s", len(content), content)
 				} else {
-					res = "HTTP/1.1 404 File Not Found\r\n\r\n"
+					res = "HTTP/1.1 404 Not Found\r\n\r\n"
 				}
 
 			} else {
