@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"net"
 	"os"
@@ -12,7 +13,8 @@ const CRLF = "\r\n"
 func main() {
 	// You can use print statements as follows for debugging, they'll be visible when running tests.
 	fmt.Println("Logs from your program will appear here!")
-
+	dir := flag.String("directory", "", "enter a directory")
+	flag.Parse()
 	ln, err := net.Listen("tcp", "0.0.0.0:4221")
 	if err != nil {
 		fmt.Println("Failed to bind to port 4221", err)
@@ -44,6 +46,16 @@ func main() {
 			} else if path == "/user-agent" {
 				msg := strings.Split(lines[2], " ")[1]
 				res = fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %v\r\n\r\n%v", len(msg), msg)
+			} else if strings.HasPrefix(path, "/files/") && *dir != "" {
+				file := path[7:]
+				fmt.Println(*dir + file)
+				if content, err := os.ReadFile(*dir + file); err == nil {
+					content := string(content)
+					res = fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: %d\r\n\r\n%s", len(content), content)
+				} else {
+					res = "HTTP/1.1 404 File Not Found\r\n\r\n"
+				}
+
 			} else {
 				res = "HTTP/1.1 404 Not Found\r\n\r\n"
 			}
