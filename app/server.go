@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"net"
+	"net/http"
 	"os"
 	"strings"
 )
@@ -14,8 +15,9 @@ func main() {
 	// You can use print statements as follows for debugging, they'll be visible when running tests.
 	fmt.Println("Logs from your program will appear here!")
 	dir := flag.String("directory", "", "enter a directory")
+	fmt.Print(*dir)
 	flag.Parse()
-	ln, err := net.Listen("tcp", "0.0.0.0:4221")
+	ln, err := net.Listen("tcp", "localhost:4221")
 	if err != nil {
 		fmt.Println("Failed to bind to port 4221", err)
 		os.Exit(1)
@@ -39,6 +41,7 @@ func main() {
 			path := strings.Split(lines[0], " ")[1]
 			method := strings.Split(lines[0], " ")[0]
 			fmt.Println(path)
+
 			var res string
 			if path == "/" {
 				res = "HTTP/1.1 200 OK\r\n\r\n"
@@ -48,6 +51,31 @@ func main() {
 			} else if path == "/user-agent" {
 				msg := strings.Split(lines[2], " ")[1]
 				res = fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %v\r\n\r\n%v", len(msg), msg)
+			} else if strings.HasPrefix(path, "/templates/") {
+				file := path[11:]
+				mux := http.NewServeMux()
+				mux.HandleFunc("/templates/", func(w http.ResponseWriter, r *http.Request) {
+					http.ServeFile(w, r, "./templates/"+file)
+					// t, _ := template.ParseFiles("./templates/" + file)
+					// t.Execute(w, "")
+				})
+				if file[len(file)-4:] == "html" {
+					loc := "./templates/" + file
+					// cont, err := os.ReadFile("./" + loc)
+					// if err != nil {
+					// 	fmt.Println(err)
+					// }
+					// fmt.Println(string(cont))
+					if content, err := os.ReadFile(loc); err == nil {
+						fmt.Println(content)
+						// tmpl:=template.ParseFiles(string(file))
+						content := string(content)
+						res = fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: %d\r\n\r\n%s", len(content), content)
+					} else {
+						res = "HTTP/1.1 404 Not found\r\n\r\n"
+					}
+
+				}
 			} else if strings.HasPrefix(path, "/files/") && *dir != "" {
 				filename := path[7:]
 				fmt.Println(*dir + filename)
