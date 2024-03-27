@@ -53,28 +53,21 @@ func main() {
 				res = fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %v\r\n\r\n%v", len(msg), msg)
 			} else if strings.HasPrefix(path, "/templates/") {
 				file := path[11:]
-				mux := http.NewServeMux()
-				mux.HandleFunc("/templates/", func(w http.ResponseWriter, r *http.Request) {
-					http.ServeFile(w, r, "./templates/"+file)
-					// t, _ := template.ParseFiles("./templates/" + file)
-					// t.Execute(w, "")
-				})
-				if file[len(file)-4:] == "html" {
+				if len(file) > 4 && file[len(file)-4:] == "html" {
 					loc := "./templates/" + file
-					// cont, err := os.ReadFile("./" + loc)
-					// if err != nil {
-					// 	fmt.Println(err)
-					// }
-					// fmt.Println(string(cont))
+					mux := http.NewServeMux()
+					mux.HandleFunc("/templates/", func(w http.ResponseWriter, r *http.Request) {
+						http.ServeFile(w, r, loc)
+					})
+
 					if content, err := os.ReadFile(loc); err == nil {
-						fmt.Println(content)
-						// tmpl:=template.ParseFiles(string(file))
 						content := string(content)
 						res = fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: %d\r\n\r\n%s", len(content), content)
 					} else {
 						res = "HTTP/1.1 404 Not found\r\n\r\n"
 					}
-
+				} else {
+					res = "HTTP/1.1 Invalid Format\r\n\r\n"
 				}
 			} else if strings.HasPrefix(path, "/files/") && *dir != "" {
 				filename := path[7:]
