@@ -11,6 +11,6 @@ Along the way you'll learn about TCP servers,
 [HTTP request syntax](https://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html),
 and more. Language specific implementations: `net` package of the standard library, string parsing, and goroutines, etc.
 
-The Computerphile video below gives a good overview of the considerations for building a webserver.
+The Computerphile video below gives a good overview of the considerations for building a webserver. (Using Rust)
 
 [![Computerphile thumbnail](https://img.youtube.com/vi/7GBlCinu9yg/0.jpg)](https://www.youtube.com/watch?v=7GBlCinu9yg "Coding a Web Server in 25 Lines - Computerphile") 
